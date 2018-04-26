@@ -5,12 +5,13 @@ BASE_URL = 'http://services.runescape.com/'
 
 
 class highScores:
-    pass
+    def __init__(self, rsn):
+        pass
 
 
 class player:
-    pass
-
+    def __init__(self, rsn: str, auto_fetch: bool):
+        pass
 
 class clan:
     CLAN_MEM_URL = BASE_URL + 'm=clan-hiscores/members_lite.ws?clanName={}'
