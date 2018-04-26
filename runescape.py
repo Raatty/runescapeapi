@@ -5,7 +5,12 @@ BASE_URL = 'http://services.runescape.com/'
 
 
 class highScores:
-    def __init__(self, rsn):
+    '''3 types hiscore, hiscore_ironman, hiscore_hardcore_ironman'''
+    HIGHSCORES_URL = BASE_URL + 'm={}/index_lite.ws?player={}'
+    def __init__(self, rsn: str, type: str):
+        self.rsn = rsn
+        self.skills = {}
+    def _fetch(self):
         pass
 
 
