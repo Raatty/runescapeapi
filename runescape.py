@@ -1,5 +1,6 @@
 import wikia
 import requests
+from operator import attrgetter
 
 BASE_URL = 'http://services.runescape.com/'
 
@@ -40,7 +41,8 @@ class highScores:
                 raise AttributeError
         self.skills =  list(self._fetch(self.rsn, self.type))
         self.total = self.skills[0]
-        self.skills = self.skills[1:]
+        self.skills = sorted(self.skills[1:], key=lambda x: list(self.SKILL_NAMES.values())[x['id']])
+
 
 class player:
     def __init__(self, rsn: str, auto_fetch: bool):
