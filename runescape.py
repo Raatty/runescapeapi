@@ -7,7 +7,7 @@ BASE_URL = 'http://services.runescape.com/'
 class highScores:
     '''3 types hiscore, hiscore_ironman, hiscore_hardcore_ironman'''
     HIGHSCORES_URL = BASE_URL + 'm={}/index_lite.ws?player={}'
-    SKILL_NAMES = {'Attack': 1, 'Defence': 7, 'Strength': 4,
+    SKILL_NAMES = {'Total': 0, 'Attack': 1, 'Defence': 7, 'Strength': 4,
                    'Constitution': 2, 'Ranged': 10, 'Prayer': 13,
                    'Magic': 16, 'Cooking': 12, 'Woodcutting': 18,
                    'Fletching': 17, 'Fishing': 9, 'Firemaking': 15, 
@@ -16,10 +16,20 @@ class highScores:
                    'Slayer': 20, 'Farming': 21, 'Runecrafting': 19,
                    'Hunter': 23, 'Construction': 22, 'Summoning': 24,
                    'Dungeoneering': 25, 'Divination': 26, 'Invention': 27}
+    def _fetch(self, rsn, type):
+        url = self.HIGHSCORES_URL.format(type, rsn)
+        fetched_scores = requests.get(url).text
+        levels = []
+        for row in fetched_scores.split('\n'):
+            for col in row.split(' '):
+                if len(levels) <= 27:
+                    levels.append(col)
+        for index, lvl in enumerate(levels):
+            lvl_split = lvl.split(',')
+            yield {'level': lvl_split[1], 'xp': lvl_split[2], 'rank': lvl_split[0], 'id': index, 'name': list(self.SKILL_NAMES.keys())[index]}
 
     def __init__(self, rsn: str, type: str = None):
         self.rsn = rsn
-        self.skills = {}
         if type is None:
             self.type = 'hiscore'
         else:
@@ -28,24 +38,9 @@ class highScores:
                 self.type = type
             else:
                 raise AttributeError
-            self._fetch(self.rsn, self.type)
-
-    def _fetch(self, rsn, type):
-        url = self.HIGHSCORES_URL.format(type, rsn)
-        fetched_scores = requests.get(url).text
-        levels = []
-        for row in fetched_scores.split('\n'):
-            col = row.split(' ')
-            levels.append(col[0])
-            if len(levels) <= 27:
-                try:
-                    levels.append(col[1])
-                except IndexError:
-                    pass
-            else:
-                break
-        print(levels)
-
+        self.skills =  list(self._fetch(self.rsn, self.type))
+        self.total = self.skills[0]
+        self.skills = self.skills[1:]
 
 class player:
     def __init__(self, rsn: str, auto_fetch: bool):
