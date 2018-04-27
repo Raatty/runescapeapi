@@ -17,7 +17,7 @@ class highScores:
                    'Hunter': 23, 'Construction': 22, 'Summoning': 24,
                    'Dungeoneering': 25, 'Divination': 26, 'Invention': 27}
     def _fetch(self, rsn, type):
-        url = self.HIGHSCORES_URL.format(type, rsn)
+        url = self.HIGHSCORES_URL.format(type, rsn.replace(' ', '+'))
         fetched_scores = requests.get(url).text
         levels = []
         for row in fetched_scores.split('\n'):
