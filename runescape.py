@@ -7,12 +7,32 @@ BASE_URL = 'http://services.runescape.com/'
 class highScores:
     '''3 types hiscore, hiscore_ironman, hiscore_hardcore_ironman'''
     HIGHSCORES_URL = BASE_URL + 'm={}/index_lite.ws?player={}'
-    def __init__(self, rsn: str, type: str):
+    def __init__(self, rsn: str, type: str = None):
         self.rsn = rsn
         self.skills = {}
-    def _fetch(self):
-        pass
-
+        if type == None:
+            self.type = 'hiscore'
+        else:
+            if type in ['hiscore', 'hiscore_ironman', 'hiscore_hardcore_ironman']:
+                self.type = type
+            else:
+                raise AttributeError
+            self._fetch(self.rsn, self.type)
+    def _fetch(self, rsn, type):
+        url = self.HIGHSCORES_URL.format(type, rsn)
+        fetched_scores = requests.get(url).text
+        levels = []
+        for row in fetched_scores.split('\n'):
+            col =  row.split(' ')
+            levels.append(col[0])
+            if len(levels) <= 27:
+                try:
+                    levels.append(col[1])
+                except IndexError:
+                    pass
+            else:
+                break
+        print(levels)
 
 class player:
     def __init__(self, rsn: str, auto_fetch: bool):
