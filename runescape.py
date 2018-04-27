@@ -7,23 +7,35 @@ BASE_URL = 'http://services.runescape.com/'
 class highScores:
     '''3 types hiscore, hiscore_ironman, hiscore_hardcore_ironman'''
     HIGHSCORES_URL = BASE_URL + 'm={}/index_lite.ws?player={}'
+    SKILL_NAMES = {'Attack': 1, 'Defence': 7, 'Strength': 4,
+                   'Constitution': 2, 'Ranged': 10, 'Prayer': 13,
+                   'Magic': 16, 'Cooking': 12, 'Woodcutting': 18,
+                   'Fletching': 17, 'Fishing': 9, 'Firemaking': 15, 
+                   'Crafting': 14, 'Smithing': 6, 'Mining': 3,
+                   'Herblore': 8, 'Agility': 5, 'Thieving': 11,
+                   'Slayer': 20, 'Farming': 21, 'Runecrafting': 19,
+                   'Hunter': 23, 'Construction': 22, 'Summoning': 24,
+                   'Dungeoneering': 25, 'Divination': 26, 'Invention': 27}
+
     def __init__(self, rsn: str, type: str = None):
         self.rsn = rsn
         self.skills = {}
-        if type == None:
+        if type is None:
             self.type = 'hiscore'
         else:
-            if type in ['hiscore', 'hiscore_ironman', 'hiscore_hardcore_ironman']:
+            if type in ['hiscore', 'hiscore_ironman', 
+                        'hiscore_hardcore_ironman']:
                 self.type = type
             else:
                 raise AttributeError
             self._fetch(self.rsn, self.type)
+
     def _fetch(self, rsn, type):
         url = self.HIGHSCORES_URL.format(type, rsn)
         fetched_scores = requests.get(url).text
         levels = []
         for row in fetched_scores.split('\n'):
-            col =  row.split(' ')
+            col = row.split(' ')
             levels.append(col[0])
             if len(levels) <= 27:
                 try:
@@ -34,9 +46,11 @@ class highScores:
                 break
         print(levels)
 
+
 class player:
     def __init__(self, rsn: str, auto_fetch: bool):
         pass
+
 
 class clan:
     CLAN_MEM_URL = BASE_URL + 'm=clan-hiscores/members_lite.ws?clanName={}'
@@ -90,7 +104,6 @@ class clan:
 
 class _wikia:
     def __init__(self, wiki: str):
-        '''subclass this fuction so you dont need to put the wiki augument in all the time'''
         self.wiki = wiki
 
     def page(self, pageName: str):
