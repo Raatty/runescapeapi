@@ -16,29 +16,35 @@ class Highscores:
                    'Slayer': 20, 'Farming': 21, 'Runecrafting': 19,
                    'Hunter': 23, 'Construction': 22, 'Summoning': 24,
                    'Dungeoneering': 25, 'Divination': 26, 'Invention': 27}
-    def _fetch(self, rsn, type):
+    def _fetch(self, rsn, type, skill_count: int):
         url = self.HIGHSCORES_URL.format(type, rsn.replace(' ', '+'))
         fetched_scores = requests.get(url).text
         levels = []
         for row in fetched_scores.split('\n'):
             for col in row.split(' '):
-                if len(levels) <= 27:
+                if len(levels) <= skill_count:
                     levels.append(col)
         for index, lvl in enumerate(levels):
             lvl_split = lvl.split(',')
             yield {'level': lvl_split[1], 'xp': lvl_split[2], 'rank': lvl_split[0], 'id': index, 'name': list(self.SKILL_NAMES.keys())[index]}
 
-    def __init__(self, rsn: str, type: str = None):
+    def __init__(self, rsn: str, type_: str = None):
         self.rsn = rsn
-        if type is None:
+        if type_ is None:
             self.type = 'hiscore'
+            self.skill_count = 27
         else:
-            if type in ['hiscore', 'hiscore_ironman', 
+            if type_ in ['hiscore', 'hiscore_ironman', 
                         'hiscore_hardcore_ironman']:
-                self.type = type
+                self.type = type_
+                self.skill_count = 27
+            elif type_ in ['hiscore_oldschool', 'hiscore_oldschool_ironman',
+                        'hiscore_oldschool_ultimate']:
+                self.type = type_
+                self.skill_count = 23
             else:
                 raise AttributeError
-        self.skills =  list(self._fetch(self.rsn, self.type))
+        self.skills =  list(self._fetch(self.rsn, self.type, self.skill_count))
         self.total = self.skills[0]
         self.skills = sorted(self.skills[1:], key=lambda x: self.SKILL_NAMES[x['name']])
 
