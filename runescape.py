@@ -70,11 +70,21 @@ class Player:
     will look up lots about a player
     '''
     RUNEMETRICS_BASE_URL = 'https://apps.runescape.com/runemetrics/'
-    RUNE_METRICS_URL = 'profile/profile?user={}&activities=20'
-    RUNE_METRICS_QUESTS_URL = 'quests?user={}'
+    RUNE_METRICS_URL = RUNEMETRICS_BASE_URL + 'profile/profile?user={}&activities=20'
+    RUNE_METRICS_QUESTS_URL = RUNEMETRICS_BASE_URL + 'quests?user={}'
 
     def _fetch_runemetics(self):
-        pass
+        metrics = requests.get(self.RUNE_METRICS_URL.format(self._rsn)).json()
+        self.profile['rsn'] = metrics['name']
+        self.profile['overall_total'] = {'xp': metrics['totalxp'],
+                                         'level': metrics['totalskill'],
+                                         'rank': metrics['rank']}
+        self.profile['combat'] = {'combatlevel': metrics['combatlevel']}
+        self.profile['quest_summary'] = {'started': metrics['questsstarted'],
+                                         'complete': metrics['questscomplete'],
+                                         'notstarted': metrics['questsnotstarted']}
+        self.profile['alog'] = metrics['activities']
+        self.profile['stats'] = sorted([dict(i, **{'name': list(Highscores.SKILL_NAMES.keys())[i['id']+1]}) for i in metrics['skillvalues']], key=lambda x: Highscores.SKILL_NAMES[x['name']])
 
     def _fetch_quests(self):
         pass
@@ -83,32 +93,44 @@ class Player:
         pass
 
     def __init__(self, rsn: str, auto_fetch: bool = False):
-        self.profile = {'rsn': None, 'overall_total': None, 'fav_combat': None,
+        self.profile = {'rsn': None, 'overall_total': None, 'combat': None,
                         'quest_summary': None, 'alog': None, 'stats': None,
                         'quest_list': None, 'clan': None, 'title': None}
-        self._rsn = rsn
+        self._rsn = rsn.replace(' ', '%20')
         if auto_fetch:
             self._fetch_runemetics()
             self._fetch_quests()
             self._fetch_clan_and_title()
 
     def rsn(self):
-        pass
+        if self.profile['rsn'] is None:
+            self._fetch_runemetics()
+        return self.profile['rsn']
 
     def overall_total(self):
-        pass
+        if self.profile['overall_total'] is None:
+            self._fetch_runemetics()
+        return self.profile['overall_total']
 
-    def fav_combat(self):
-        pass
+    def combat(self):
+        if self.profile['combat'] is None:
+            self._fetch_runemetics()
+        return self.profile['combat']
 
     def quest_summary(self):
-        pass
+        if self.profile['quest_summary'] is None:
+            self._fetch_runemetics()
+        return self.profile['quest_summary']
 
     def alog(self):
-        pass
+        if self.profile['alog'] is None:
+            self._fetch_runemetics()
+        return self.profile['alog']
 
     def stats(self):
-        pass
+        if self.profile['stats'] is None:
+            self._fetch_runemetics()
+        return self.profile['stats']
 
     def quest_list(self):
         pass
