@@ -1,11 +1,10 @@
 import wikia
 import requests
-from operator import attrgetter
 
 BASE_URL = 'http://services.runescape.com/'
 
 
-class highScores:
+class Highscores:
     '''3 types hiscore, hiscore_ironman, hiscore_hardcore_ironman'''
     HIGHSCORES_URL = BASE_URL + 'm={}/index_lite.ws?player={}'
     SKILL_NAMES = {'Total': 0, 'Attack': 1, 'Defence': 7, 'Strength': 4,
@@ -41,15 +40,15 @@ class highScores:
                 raise AttributeError
         self.skills =  list(self._fetch(self.rsn, self.type))
         self.total = self.skills[0]
-        self.skills = sorted(self.skills[1:], key=lambda x: list(self.SKILL_NAMES.values())[x['id']])
+        self.skills = sorted(self.skills[1:], key=lambda x: self.SKILL_NAMES[x['name']])
 
 
-class player:
+class Player:
     def __init__(self, rsn: str, auto_fetch: bool):
         pass
 
 
-class clan:
+class Clan:
     CLAN_MEM_URL = BASE_URL + 'm=clan-hiscores/members_lite.ws?clanName={}'
 
     def __init__(self, clan: str):
@@ -99,7 +98,7 @@ class clan:
                 yield {'rsn': i[0], 'rank': i[1], 'clanxp': i[2], 'kills': i[3]}
 
 
-class _wikia:
+class _Wikia:
     def __init__(self, wiki: str):
         self.wiki = wiki
 
@@ -117,13 +116,13 @@ class _wikia:
             yield wikia.page(self.wiki, i)
 
 
-osrsWikia = _wikia('2007runescape')
-rs3Wikia = _wikia('runescape')
+osrsWikia = _Wikia('2007runescape')
+rs3Wikia = _Wikia('runescape')
 
 
-class beasts:
+class Beasts:
     pass
 
 
-class grandExchange:
+class GrandExchange:
     pass
