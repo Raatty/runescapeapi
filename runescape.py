@@ -9,9 +9,10 @@ BASE_URL = 'http://services.runescape.com/'
 
 
 class Highscores:
-    '''fetches highscores and gives em back as a list of dicts 
+    '''fetches highscores and gives em back as a list of dicts
     6 different types hiscore, hiscore_ironman, hiscore_hardcore_ironman
-    'hiscore_oldschool', 'hiscore_oldschool_ironman', 'hiscore_oldschool_ultimate
+    'hiscore_oldschool', 'hiscore_oldschool_ironman',
+    'hiscore_oldschool_ultimate
     this class takes two arguments rsn and type 'hiscore' is the default
     usage:
     person = runescape.Highscores('raatty', 'hiscore')
@@ -24,12 +25,13 @@ class Highscores:
     SKILL_NAMES = {'Total': 0, 'Attack': 1, 'Defence': 7, 'Strength': 4,
                    'Constitution': 2, 'Ranged': 10, 'Prayer': 13,
                    'Magic': 16, 'Cooking': 12, 'Woodcutting': 18,
-                   'Fletching': 17, 'Fishing': 9, 'Firemaking': 15, 
+                   'Fletching': 17, 'Fishing': 9, 'Firemaking': 15,
                    'Crafting': 14, 'Smithing': 6, 'Mining': 3,
                    'Herblore': 8, 'Agility': 5, 'Thieving': 11,
                    'Slayer': 20, 'Farming': 21, 'Runecrafting': 19,
                    'Hunter': 23, 'Construction': 22, 'Summoning': 24,
                    'Dungeoneering': 25, 'Divination': 26, 'Invention': 27}
+
     def _fetch(self, rsn, type, skill_count: int):
         url = self.HIGHSCORES_URL.format(type, rsn.replace(' ', '+'))
         fetched_scores = requests.get(url).text
@@ -48,17 +50,17 @@ class Highscores:
             self.type = 'hiscore'
             self.skill_count = 27
         else:
-            if type_ in ['hiscore', 'hiscore_ironman', 
-                        'hiscore_hardcore_ironman']:
+            if type_ in ['hiscore', 'hiscore_ironman',
+                         'hiscore_hardcore_ironman']:
                 self.type = type_
                 self.skill_count = 27
             elif type_ in ['hiscore_oldschool', 'hiscore_oldschool_ironman',
-                        'hiscore_oldschool_ultimate']:
+                           'hiscore_oldschool_ultimate']:
                 self.type = type_
                 self.skill_count = 23
             else:
                 raise AttributeError
-        self.skills =  list(self._fetch(self.rsn, self.type, self.skill_count))
+        self.skills = list(self._fetch(self.rsn, self.type, self.skill_count))
         self.total = self.skills[0]
         self.skills = sorted(self.skills[1:], key=lambda x: self.SKILL_NAMES[x['name']])
 
@@ -70,29 +72,53 @@ class Player:
     RUNEMETRICS_BASE_URL = 'https://apps.runescape.com/runemetrics/'
     RUNE_METRICS_URL = 'profile/profile?user={}&activities=20'
     RUNE_METRICS_QUESTS_URL = 'quests?user={}'
-    def __init__(self, rsn: str, auto_fetch: bool):
+
+    def _fetch_runemetics(self):
+        pass
+
+    def _fetch_quests(self):
+        pass
+
+    def _fetch_clan_and_title(self):
+        pass
+
+    def __init__(self, rsn: str, auto_fetch: bool = False):
         self.profile = {'rsn': None, 'overall_total': None, 'fav_combat': None,
                         'quest_summary': None, 'alog': None, 'stats': None,
                         'quest_list': None, 'clan': None, 'title': None}
-    
+        self._rsn = rsn
+        if auto_fetch:
+            self._fetch_runemetics()
+            self._fetch_quests()
+            self._fetch_clan_and_title()
+
     def rsn(self):
         pass
+
     def overall_total(self):
         pass
+
     def fav_combat(self):
         pass
+
     def quest_summary(self):
         pass
+
     def alog(self):
         pass
+
     def stats(self):
         pass
+
     def quest_list(self):
         pass
+
     def quest(self, name):
         pass
+
     def clan(self):
         pass
+
     def title(self):
         pass
 
@@ -102,7 +128,7 @@ class Clan:
     Gets a list of members in a clan
     usage:
     list(runescape.Clan('empire of elitez'))
-    or 
+    or
     for member in runescape.Clan('empire of elitez')
         #do stuff
     '''
