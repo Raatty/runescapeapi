@@ -1,3 +1,7 @@
+'''
+A slightly memes wrapper for the runescape api, hopefully helps people
+best way to contact me with any problems is on discord raatty#3522
+'''
 import wikia
 import requests
 
@@ -5,7 +9,17 @@ BASE_URL = 'http://services.runescape.com/'
 
 
 class Highscores:
-    '''3 types hiscore, hiscore_ironman, hiscore_hardcore_ironman'''
+    '''fetches highscores and gives em back as a list of dicts 
+    6 different types hiscore, hiscore_ironman, hiscore_hardcore_ironman
+    'hiscore_oldschool', 'hiscore_oldschool_ironman', 'hiscore_oldschool_ultimate
+    this class takes two arguments rsn and type 'hiscore' is the default
+    usage:
+    person = runescape.Highscores('raatty', 'hiscore')
+    or person = runescape.Highscores('raatty') would give same effect
+    person.skills will give a list of skills in game order
+    person.total will give you the total
+    person.rsn in case you forget who you looked up
+    '''
     HIGHSCORES_URL = BASE_URL + 'm={}/index_lite.ws?player={}'
     SKILL_NAMES = {'Total': 0, 'Attack': 1, 'Defence': 7, 'Strength': 4,
                    'Constitution': 2, 'Ranged': 10, 'Prayer': 13,
@@ -55,6 +69,14 @@ class Player:
 
 
 class Clan:
+    '''
+    Gets a list of members in a clan
+    usage:
+    list(runescape.Clan('empire of elitez'))
+    or 
+    for member in runescape.Clan('empire of elitez')
+        #do stuff
+    '''
     CLAN_MEM_URL = BASE_URL + 'm=clan-hiscores/members_lite.ws?clanName={}'
 
     def __init__(self, clan: str):
@@ -70,6 +92,14 @@ class Clan:
         return len(self.members)
 
     def keys(self):
+        '''
+        will give a list of the key ranks in clan
+        usage:
+        list(runescape.Clan('empire of elitez').keys())
+        or
+        for member in runescape.Clan('empire of elitez').keys():
+            #do stuff
+        '''
         for i in self.members:
             keyRanks = ['Owner', 'Deputy Owner', 'Overseer']
             i = i.split(',')
@@ -77,6 +107,15 @@ class Clan:
                 yield {'rsn': i[0], 'rank': i[1], 'clanxp': i[2], 'kills': i[3]}
 
     def adminish(self):
+        '''
+        will give a list of the adminish ranks in clan
+        (the ones that kind of look like little badges like admin rank)
+        usage:
+        list(runescape.Clan('empire of elitez').adminish())
+        or
+        for member in runescape.Clan('empire of elitez').adminish():
+            #do stuff
+        '''
         for i in self.members:
             adminishRanks = ['Coordinator', 'Organiser', 'Admin']
             i = i.split(',')
@@ -84,6 +123,14 @@ class Clan:
                 yield {'rsn': i[0], 'rank': i[1], 'clanxp': i[2], 'kills': i[3]}
 
     def stars(self):
+        '''
+        will give a list of the star ranks in clan
+        usage:
+        list(runescape.Clan('empire of elitez').stars())
+        or
+        for member in runescape.Clan('empire of elitez').stars():
+            #do stuff
+        '''
         for i in self.members:
             starRanks = ['General', 'Captain', 'Lieutenant']
             i = i.split(',')
@@ -91,6 +138,14 @@ class Clan:
                 yield {'rsn': i[0], 'rank': i[1], 'clanxp': i[2], 'kills': i[3]}
 
     def bannanas(self):
+        '''
+        will give a list of the banana ranks in clan
+        usage:
+        list(runescape.Clan('empire of elitez').bananas())
+        or
+        for member in runescape.Clan('empire of elitez').bananas():
+            #do stuff
+        '''
         for i in self.members:
             bananaRanks = ['Sergeant', 'Corporal', 'Recruit']
             i = i.split(',')
@@ -98,13 +153,24 @@ class Clan:
                 yield {'rsn': i[0], 'rank': i[1], 'clanxp': i[2], 'kills': i[3]}
 
     def rank(self, rank: str):
+        '''
+        will give a list of the members with a specific rank in a clan
+        usage:
+        list(runescape.Clan('empire of elitez').rank('Owner'))
+        or
+        for member in runescape.Clan('empire of elitez').rank('Owner'):
+            #do stuff
+        '''
         for i in self.members:
             i = i.split(',')
             if i[1] == rank:
                 yield {'rsn': i[0], 'rank': i[1], 'clanxp': i[2], 'kills': i[3]}
 
 
-class _Wikia:
+class Wikia:
+    '''
+    a simple wrapper I made to navigate the wikia
+    '''
     def __init__(self, wiki: str):
         self.wiki = wiki
 
@@ -122,8 +188,8 @@ class _Wikia:
             yield wikia.page(self.wiki, i)
 
 
-osrsWikia = _Wikia('2007runescape')
-rs3Wikia = _Wikia('runescape')
+osrsWikia = Wikia('2007runescape')
+rs3Wikia = Wikia('runescape')
 
 
 class Beasts:
