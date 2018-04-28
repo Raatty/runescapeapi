@@ -64,7 +64,36 @@ class Highscores:
 
 
 class Player:
+    '''
+    will look up lots about a player
+    '''
+    RUNEMETRICS_BASE_URL = 'https://apps.runescape.com/runemetrics/'
+    RUNE_METRICS_URL = 'profile/profile?user={}&activities=20'
+    RUNE_METRICS_QUESTS_URL = 'quests?user={}'
     def __init__(self, rsn: str, auto_fetch: bool):
+        self.profile = {'rsn': None, 'overall_total': None, 'fav_combat': None,
+                        'quest_summary': None, 'alog': None, 'stats': None,
+                        'quest_list': None, 'clan': None, 'title': None}
+    
+    def rsn(self):
+        pass
+    def overall_total(self):
+        pass
+    def fav_combat(self):
+        pass
+    def quest_summary(self):
+        pass
+    def alog(self):
+        pass
+    def stats(self):
+        pass
+    def quest_list(self):
+        pass
+    def quest(self, name):
+        pass
+    def clan(self):
+        pass
+    def title(self):
         pass
 
 
