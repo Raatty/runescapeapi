@@ -73,7 +73,7 @@ class Player:
     RUNE_METRICS_URL = RUNEMETRICS_BASE_URL + 'profile/profile?user={}&activities=20'
     RUNE_METRICS_QUESTS_URL = RUNEMETRICS_BASE_URL + 'quests?user={}'
 
-    def _fetch_runemetics(self):
+    def _fetch_runemetrics(self):
         metrics = requests.get(self.RUNE_METRICS_URL.format(self._rsn)).json()
         self.profile['rsn'] = metrics['name']
         self.profile['overall_total'] = {'xp': metrics['totalxp'],
@@ -98,38 +98,38 @@ class Player:
                         'quest_list': None, 'clan': None, 'title': None}
         self._rsn = rsn.replace(' ', '%20')
         if auto_fetch:
-            self._fetch_runemetics()
+            self._fetch_runemetrics()
             self._fetch_quests()
             self._fetch_clan_and_title()
 
     def rsn(self):
         if self.profile['rsn'] is None:
-            self._fetch_runemetics()
+            self._fetch_runemetrics()
         return self.profile['rsn']
 
     def overall_total(self):
         if self.profile['overall_total'] is None:
-            self._fetch_runemetics()
+            self._fetch_runemetrics()
         return self.profile['overall_total']
 
     def combat(self):
         if self.profile['combat'] is None:
-            self._fetch_runemetics()
+            self._fetch_runemetrics()
         return self.profile['combat']
 
     def quest_summary(self):
         if self.profile['quest_summary'] is None:
-            self._fetch_runemetics()
+            self._fetch_runemetrics()
         return self.profile['quest_summary']
 
     def alog(self):
         if self.profile['alog'] is None:
-            self._fetch_runemetics()
+            self._fetch_runemetrics()
         return self.profile['alog']
 
     def stats(self):
         if self.profile['stats'] is None:
-            self._fetch_runemetics()
+            self._fetch_runemetrics()
         return self.profile['stats']
 
     def quest_list(self):
