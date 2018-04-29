@@ -42,7 +42,23 @@ class Highscores:
                     levels.append(col)
         for index, lvl in enumerate(levels):
             lvl_split = lvl.split(',')
-            yield {'level': lvl_split[1], 'xp': lvl_split[2], 'rank': lvl_split[0], 'id': index, 'name': list(self.SKILL_NAMES.keys())[index]}
+            yield {'level': int(lvl_split[1]), 'xp': int(lvl_split[2]), 'rank': int(lvl_split[0]), 'id': index, 'name': list(self.SKILL_NAMES.keys())[index]}
+
+    def _calculate_combat(self):
+        melee = self.skill('Attack') + self.skill('Strength')
+        magic = 2 * self.skill('Magic')
+        range = 2 * self.skill('Ranged')
+        m = max(melee, magic, range)
+        one = 1.3 * m
+        two = self.skill('Defence') + self.skill('Constitution')
+        three = self.skill('Prayer') // 2
+        four = self.skill('Summoning') // 2
+        return int(sum([one, two, three, four]) // 4)
+
+    def skill(self, name):
+        for s in self.skills:
+            if name == s['name']:
+                return s['level']
 
     def __init__(self, rsn: str, type_: str = None):
         self.rsn = rsn
@@ -63,6 +79,7 @@ class Highscores:
         self.skills = list(self._fetch(self.rsn, self.type, self.skill_count))
         self.total = self.skills[0]
         self.skills = sorted(self.skills[1:], key=lambda x: self.SKILL_NAMES[x['name']])
+        self.combat_level = self._calculate_combat()
 
 
 class Player:
@@ -75,16 +92,25 @@ class Player:
 
     def _fetch_runemetrics(self):
         metrics = requests.get(self.RUNE_METRICS_URL.format(self._rsn)).json()
-        self.profile['rsn'] = metrics['name']
-        self.profile['overall_total'] = {'xp': metrics['totalxp'],
-                                         'level': metrics['totalskill'],
-                                         'rank': metrics['rank']}
-        self.profile['combat'] = {'combatlevel': metrics['combatlevel']}
-        self.profile['quest_summary'] = {'started': metrics['questsstarted'],
-                                         'complete': metrics['questscomplete'],
-                                         'notstarted': metrics['questsnotstarted']}
-        self.profile['alog'] = metrics['activities']
-        self.profile['stats'] = sorted([dict(i, **{'name': list(Highscores.SKILL_NAMES.keys())[i['id']+1]}) for i in metrics['skillvalues']], key=lambda x: Highscores.SKILL_NAMES[x['name']])
+        try:
+            error = metrics['error']
+            if error == 'NO_PROFILE':
+                raise LookupError
+            elif error == 'PROFILE_PRIVATE':
+                self.profile['rsn'] = self._rsn.replace('%20', ' ')
+                stats = Highscores(self.profile['rsn'])
+                self.profile['overall_total'] = stats.total
+                self.profile['combat'] = {'combatlevel': stats.combat_level}
+                self.profile['quest_summary'] = {'started': None, 'complete': None, 'notstarted': None}
+                self.profile['alog'] = []
+                self.profile['stats'] = stats.skills
+        except KeyError:
+            self.profile['rsn'] = metrics['name']
+            self.profile['overall_total'] = {'xp': metrics['totalxp'], 'level': metrics['totalskill'], 'rank': metrics['rank']}
+            self.profile['combat'] = {'combatlevel': metrics['combatlevel']}
+            self.profile['quest_summary'] = {'started': metrics['questsstarted'], 'complete': metrics['questscomplete'], 'notstarted': metrics['questsnotstarted']}
+            self.profile['alog'] = metrics['activities']
+            self.profile['stats'] = sorted([dict(i, **{'name': list(Highscores.SKILL_NAMES.keys())[i['id']+1]}) for i in metrics['skillvalues']], key=lambda x: Highscores.SKILL_NAMES[x['name']])
 
     def _fetch_quests(self):
         pass
