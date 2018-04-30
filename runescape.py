@@ -45,15 +45,22 @@ class Highscores:
             yield {'level': int(lvl_split[1]), 'xp': int(lvl_split[2]), 'rank': int(lvl_split[0]), 'id': index, 'name': list(self.SKILL_NAMES.keys())[index]}
 
     def _calculate_combat(self):
-        melee = self.skill('Attack') + self.skill('Strength')
-        magic = 2 * self.skill('Magic')
-        range = 2 * self.skill('Ranged')
-        m = max(melee, magic, range)
-        one = 1.3 * m
-        two = self.skill('Defence') + self.skill('Constitution')
-        three = self.skill('Prayer') // 2
-        four = self.skill('Summoning') // 2
-        return int(sum([one, two, three, four]) // 4)
+        if self.skill_count == 27:
+            melee = self.skill('Attack') + self.skill('Strength')
+            magic = 2 * self.skill('Magic')
+            range = 2 * self.skill('Ranged')
+            m = max(melee, magic, range)
+            one = 1.3 * m
+            two = self.skill('Defence') + self.skill('Constitution')
+            three = self.skill('Prayer') // 2
+            four = self.skill('Summoning') // 2
+            return int(sum([one, two, three, four]) // 4)
+        elif self.skill_count == 23:
+            first = 0.325 * max(self.skill('Attack') + self.skill('Strength'), 1.5 * self.skill('Magic'), 1.5 * self.skill('Ranged')) 
+            second = self.skill('Defence') / 4
+            third = self.skill('Constitution') / 4
+            fourth = (self.skill('Prayer') // 2) / 4
+            return int(sum([first, second, third, fourth]))
 
     def skill(self, name):
         for s in self.skills:
