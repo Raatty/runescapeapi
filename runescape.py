@@ -120,7 +120,7 @@ class Player:
             self.profile['stats'] = sorted([dict(i, **{'name': list(Highscores.SKILL_NAMES.keys())[i['id']+1]}) for i in metrics['skillvalues']], key=lambda x: Highscores.SKILL_NAMES[x['name']])
 
     def _fetch_quests(self):
-        pass
+        self.profile['quest_list'] = requests.get(self.RUNE_METRICS_QUESTS_URL.format(self._rsn)).json()['quests']
 
     def _fetch_clan_and_title(self):
         pass
@@ -166,10 +166,14 @@ class Player:
         return self.profile['stats']
 
     def quest_list(self):
-        pass
+        if self.profile['quest_list'] is None:
+            self._fetch_quests()
+        return self.profile['quest_list']
 
     def quest(self, name):
-        pass
+        for q in self.quest_list():
+            if q['title'].lower() == name.lower():
+                return q
 
     def clan(self):
         pass
