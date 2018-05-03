@@ -96,6 +96,7 @@ class Player:
     RUNEMETRICS_BASE_URL = 'https://apps.runescape.com/runemetrics/'
     RUNE_METRICS_URL = RUNEMETRICS_BASE_URL + 'profile/profile?user={}&activities=20'
     RUNE_METRICS_QUESTS_URL = RUNEMETRICS_BASE_URL + 'quests?user={}'
+    FORUM_PIC_URL = BASE_URL + 'm=avatar-rs/{}/chat.png'
 
     def _fetch_runemetrics(self):
         metrics = requests.get(self.RUNE_METRICS_URL.format(self._rsn)).json()
@@ -176,10 +177,17 @@ class Player:
                 return q
 
     def clan(self):
-        pass
+        if self.profile['clan'] is None:
+            self._fetch_clan_and_title()
+        return self.profile['clan']
 
     def title(self):
-        pass
+        if self.profile['title'] is None:
+            self._fetch_clan_and_title()
+        return self.profile['title']
+
+    def forum_pic(self):
+        return self.FORUM_PIC_URL.format(self._rsn)
 
 
 class Clan:
@@ -192,10 +200,12 @@ class Clan:
         #do stuff
     '''
     CLAN_MEM_URL = BASE_URL + 'm=clan-hiscores/members_lite.ws?clanName={}'
+    CLAN_MOTIF_URL = BASE_URL + 'm=avatar-rs/{}/clanmotif.png'
 
     def __init__(self, clan: str):
         self.name = clan
         self.members = requests.get(self.CLAN_MEM_URL.format(clan.replace(' ', '+'))).content.replace(b'\xa0', b' ').decode('ascii').split('\n')[1:-1]
+        self.motif = self.CLAN_MOTIF_URL.format(clan.replace(' ', '%20'))
 
     def __iter__(self):
         for member in self.members:
