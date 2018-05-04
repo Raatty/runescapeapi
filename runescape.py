@@ -317,8 +317,104 @@ rs3Wikia = Wikia('runescape')
 
 
 class Beasts:
-    pass
+    '''
+    a bunch of methods for getting stats and seaching for monsters
+    '''
+    @staticmethod
+    def by_id(id: int):
+        '''returns stats and info about a beast by id'''
+        BEAST_ID_URL = BASE_URL + 'm=itemdb_rs/bestiary/beastData.json?beastid={}'
+        return requests.get(BEAST_ID_URL.format(id)).json()
 
+    @staticmethod
+    def search(query: str):
+        '''
+        searches the beast database for a name and returns a list seperate with +
+        '''
+        BEAST_SEARCH_URL = BASE_URL + 'm=itemdb_rs/bestiary/beastSearch.json?term={}'
+        return requests.get(BEAST_SEARCH_URL.format(query)).json()
+
+    @staticmethod
+    def by_letter(letter: str):
+        '''
+        returns a list of beasts starting with a letter
+        '''
+        BEAST_LETTER_URL = BASE_URL + 'm=itemdb_rs/bestiary/bestiaryNames.json?letter={}'
+        return requests.get(BEAST_LETTER_URL.format(letter.upper())).json()
+
+    @staticmethod
+    def area_names():
+        '''returns a list of area names'''
+        AREA_URL = BASE_URL + 'm=itemdb_rs/bestiary/areaNames.json'
+        return requests.get(AREA_URL).json()
+
+    @staticmethod
+    def by_area(area: str):
+        '''
+        returns a list of beasts in a specific area
+        see runescape.Beasts.area_names() for the list
+        '''
+        BY_AREA_URL = BASE_URL + 'm=itemdb_rs/bestiary/areaBeasts.json?identifier={}'
+        return requests.get(BY_AREA_URL.format(area.replace(' ', '+'))).json()
+
+    @staticmethod
+    def category_names():
+        '''
+        returns a list of slayer categorys
+        '''
+        CATEGORY_URL = BASE_URL + 'm=itemdb_rs/bestiary/slayerCatNames.json'
+        return requests.get(CATEGORY_URL).json()
+
+    @staticmethod
+    def by_category(cat):
+        '''
+        returns a list of monsters of a given slayer category
+        input a category id as an int or a str of the category name
+        searching by string will take longer tho 
+        see runescape.Beasts.category_names() for categorys
+        '''
+        BY_CATEGORY_URL = BASE_URL + 'm=itemdb_rs/bestiary/slayerBeasts.json?identifier={}'
+        if type(cat) == int:
+            return requests.get(BY_CATEGORY_URL.format(cat)).json()
+        elif type(cat) == str:
+            cat_list = Beasts.category_names()
+            cat = cat_list[cat]
+            return requests.get(BY_CATEGORY_URL.format(cat)).json()
+
+    @staticmethod
+    def weakness_names():
+        '''
+        returns a list of weaknesses
+        '''
+        WEAKNESS_URL = BASE_URL + 'm=itemdb_rs/bestiary/weaknessNames.json'
+        return requests.get(WEAKNESS_URL).json()
+
+    @staticmethod
+    def by_weakness(weakness):
+        '''
+        returns a list of beasts with a given weakness, input a weakness
+        id or a weakness name searching by name will take longer tho
+        see runescape.Beasts.weakness_names() for weaknesses
+        '''
+        BY_WEAKNESS_URL = BASE_URL + 'm=itemdb_rs/bestiary/weaknessBeasts.json?identifier={}'
+        if type(weakness) == int:
+            return requests.get(BY_WEAKNESS_URL.format(weakness)).json()
+        elif type(weakness) == str:
+            weakness_list = Beasts.weakness_names()
+            weakness = weakness_list[weakness]
+            return requests.get(BY_WEAKNESS_URL.format(weakness)).json()
+
+    @staticmethod
+    def by_level(lower_: int, upper_: int):
+        '''
+        returns a list of beasts within a given level range, takes
+        two arguments both ints first argument is the lowest level
+        you want to see and the second is the highest level
+        you can use 1 for the first and a high number like 10000
+        for the second to get a list of all the beasts
+        '''
+        BY_LEVEL_URL = BASE_URL + 'm=itemdb_rs/bestiary/levelGroup.json?identifier={}-{}'
+        return requests.get(BY_LEVEL_URL.format(lower_, upper_)).json()
 
 class GrandExchange:
     pass
