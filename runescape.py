@@ -4,6 +4,9 @@ best way to contact me with any problems is on discord raatty#3522
 '''
 import wikia
 import requests
+import math
+import json
+import time
 
 BASE_URL = 'http://services.runescape.com/'
 
@@ -56,7 +59,7 @@ class Highscores:
             four = self.skill('Summoning') // 2
             return int(sum([one, two, three, four]) // 4)
         elif self.skill_count == 23:
-            first = 0.325 * max(self.skill('Attack') + self.skill('Strength'), 1.5 * self.skill('Magic'), 1.5 * self.skill('Ranged')) 
+            first = 0.325 * max(self.skill('Attack') + self.skill('Strength'), 1.5 * self.skill('Magic'), 1.5 * self.skill('Ranged'))
             second = self.skill('Defence') / 4
             third = self.skill('Constitution') / 4
             fourth = (self.skill('Prayer') // 2) / 4
@@ -370,7 +373,7 @@ class Beasts:
         '''
         returns a list of monsters of a given slayer category
         input a category id as an int or a str of the category name
-        searching by string will take longer tho 
+        searching by string will take longer tho
         see runescape.Beasts.category_names() for categorys
         '''
         BY_CATEGORY_URL = BASE_URL + 'm=itemdb_rs/bestiary/slayerBeasts.json?identifier={}'
@@ -416,5 +419,84 @@ class Beasts:
         BY_LEVEL_URL = BASE_URL + 'm=itemdb_rs/bestiary/levelGroup.json?identifier={}-{}'
         return requests.get(BY_LEVEL_URL.format(lower_, upper_)).json()
 
+
 class GrandExchange:
-    pass
+    '''
+    provides methods for fetching information about items in the grandexchange
+    '''
+    LETTER_URL = BASE_URL + 'm=itemdb_rs/api/catalogue/items.json?category={}&alpha={}&page={}'
+
+    @staticmethod
+    def item(id: int):
+        '''
+        gets information on a single item
+        '''
+        ITEM_URL = BASE_URL + 'm=itemdb_rs/api/catalogue/detail.json?item={}'
+        return requests.get(ITEM_URL.format(id)).json()
+
+    @staticmethod
+    def graph(id: int):
+        '''
+        gets info on the prices over time
+        '''
+        GRAPH_URL = BASE_URL + 'm=itemdb_rs/api/graph/{}.json'
+        return requests.get(GRAPH_URL.format(id)).json()
+
+    CATEGORYS = {'miscellaneous': 0, 'ammo': 1, 'arrows': 2, 'bolts': 3,
+                 'construction materials': 4, 'construction projects': 5,
+                 'cooking ingredients': 6, 'costumes': 7, 'crafting materials': 8,
+                 'familiars': 9, 'farming produce': 10, 'fletching materials': 11,
+                 'food and drink': 12, 'herblore materials': 13, 'hunting equipment': 14,
+                 'hunting produce': 15, 'jewellery': 16, 'mage armour': 17,
+                 'mage weapons': 18, 'melee armour - low level': 19,
+                 'melee armour mid level': 20, 'melee armour high level': 21,
+                 'melee weapons - low level': 22, 'melee weapons - mid level': 23,
+                 'melee weapons - high level': 24, 'mining and smithing': 25, 'potions': 26,
+                 'prayer armour': 27, 'prayer materials': 28, 'range armour': 29,
+                 'range weapons': 30, 'runecrafting': 31, 'runes spells and teleports': 32,
+                 'seeds': 33, 'summoning scrolls': 34, 'tools and containers': 35,
+                 'woodcutting product': 36, 'pocket items': 37}
+
+    @staticmethod
+    def cat_count(id: int):
+        '''
+        tells you how many items there are for each letter in a category
+        give the id from 0 to 37 check runescape.GrandExchange.CATEGORYS for ids
+        '''
+        CAT_COUNT_URL = BASE_URL + 'm=itemdb_rs/api/catalogue/category.json?category={}'
+        return requests.get(CAT_COUNT_URL.format(id)).json()['alpha']
+
+    @staticmethod
+    def iter_letter(letter: str, category: int):
+        '''
+        iterates through a letter in a category
+        '''
+        for l in GrandExchange.cat_count(category):
+            if letter == l['letter']:
+                letter_count = l['items']
+                break
+        page_count = math.ceil(letter_count/12)
+        for page in range(1, page_count + 1):
+            p = requests.get(GrandExchange.LETTER_URL.format(category, letter.replace('#', '%23'), page)).json()
+            for item in p['items']:
+                yield item
+
+    @staticmethod
+    def iter_category(category: int, page_sleep: int=0):
+        '''
+        iterates through an entire category in put an int from 0 to 37
+        if you start getting errors use the second argument that is how many seconds
+        to sleep between pages
+        anouther way to use this is:
+        ge = [c for i in range(0,38) for c in runescape.GrandExchange.iter_category(i, 5)]
+        to get the full grand exchange in one list, will take some time tho
+        so its best to only be getting one category at a time
+        '''
+        cat_counts = GrandExchange.cat_count(category)
+        for letter in cat_counts:
+            letter_count = letter['items']
+            for page in range(1, math.ceil(letter_count/12) + 1):
+                time.sleep(page_sleep)
+                p = requests.get(GrandExchange.LETTER_URL.format(category, letter['letter'].replace('#', '%23'), page))
+                for item in p.json()['items']:
+                    yield item
