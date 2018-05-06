@@ -3,10 +3,13 @@ A slightly memes wrapper for the runescape api, hopefully helps people
 best way to contact me with any problems is on discord raatty#3522
 read the rest of the docs for module usage step one is
     import runescape
+the code in here might not be done in the best way but everything you
+need should be there
 '''
 import wikia
 import requests
 import math
+import json
 import time
 
 BASE_URL = 'http://services.runescape.com/'
@@ -111,6 +114,7 @@ class Player:
     RUNE_METRICS_URL = RUNEMETRICS_BASE_URL + 'profile/profile?user={}&activities=20'
     RUNE_METRICS_QUESTS_URL = RUNEMETRICS_BASE_URL + 'quests?user={}'
     FORUM_PIC_URL = BASE_URL + 'm=avatar-rs/{}/chat.png'
+    CLAN_AND_TITLE_URL = BASE_URL + 'm=website-data/playerDetails.ws?names=%5B%22{}%22%5D&callback=jQuery000000000000000_0000000000&_=0'
 
     def _fetch_runemetrics(self):
         metrics = requests.get(self.RUNE_METRICS_URL.format(self._rsn)).json()
@@ -138,7 +142,16 @@ class Player:
         self.profile['quest_list'] = requests.get(self.RUNE_METRICS_QUESTS_URL.format(self._rsn)).json()['quests']
 
     def _fetch_clan_and_title(self):
-        pass
+        c_and_t = requests.get(self.CLAN_AND_TITLE_URL.format(self._rsn)).content
+        c_and_t = json.loads(c_and_t[34:-4])
+        try:
+            self.profile['clan'] = c_and_t['clan']
+        except KeyError:
+            self.profile['clan'] = ''
+        try:
+            self.profile['title'] = {'isSuffix': c_and_t['isSuffix'], 'title': c_and_t['title']}
+        except KeyError:
+            self.profile['title'] = {'isSuffix': False, 'title': ''}
 
     def __init__(self, rsn: str, auto_fetch: bool = False):
         self.profile = {'rsn': None, 'overall_total': None, 'combat': None,
