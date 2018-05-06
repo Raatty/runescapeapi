@@ -1,18 +1,20 @@
 '''
 A slightly memes wrapper for the runescape api, hopefully helps people
 best way to contact me with any problems is on discord raatty#3522
+read the rest of the docs for module usage step one is
+    import runescape
 '''
 import wikia
 import requests
 import math
-import json
 import time
 
 BASE_URL = 'http://services.runescape.com/'
 
 
 class Highscores:
-    '''fetches highscores and gives em back as a list of dicts
+    '''
+    fetches highscores and gives em back as a list of dicts
     6 different types hiscore, hiscore_ironman, hiscore_hardcore_ironman
     'hiscore_oldschool', 'hiscore_oldschool_ironman',
     'hiscore_oldschool_ultimate
@@ -95,6 +97,15 @@ class Highscores:
 class Player:
     '''
     will look up lots about a player
+    the required argument is the rsn as a string but
+    there is also a second argument auto_fetch which
+    is of type bool, delfault is False but if it is
+    True this class will auto maticly visit all the different
+    links to get information but if its left blank or set
+    to False the data will just be fetched as needed
+    LookupError will be raised if the rsn does not exist
+    usage:
+        me = runescape.Player('raatty', True)
     '''
     RUNEMETRICS_BASE_URL = 'https://apps.runescape.com/runemetrics/'
     RUNE_METRICS_URL = RUNEMETRICS_BASE_URL + 'profile/profile?user={}&activities=20'
@@ -140,56 +151,118 @@ class Player:
             self._fetch_clan_and_title()
 
     def rsn(self):
+        '''
+        will return the rsn of the looked up player
+        correctly capitalised if their runemetics wasnt private
+        usage:
+            me.rsn()
+        '''
         if self.profile['rsn'] is None:
             self._fetch_runemetrics()
         return self.profile['rsn']
 
     def overall_total(self):
+        '''
+        returns total level, total xp and rank
+        usage:
+            me.overall_total()
+        '''
         if self.profile['overall_total'] is None:
             self._fetch_runemetrics()
         return self.profile['overall_total']
 
     def combat(self):
+        '''
+        returns the combat level either strait from
+        runemetics or calculated from highscores for
+        private people
+        usage:
+            me.combat()
+        '''
         if self.profile['combat'] is None:
             self._fetch_runemetrics()
         return self.profile['combat']
 
     def quest_summary(self):
+        '''
+        returns the counts of the started finished and not started quests
+        or None for thease three values if they are private
+        usage:
+            me.quest_summary()
+        '''
         if self.profile['quest_summary'] is None:
             self._fetch_runemetrics()
         return self.profile['quest_summary']
 
     def alog(self):
+        '''
+        returns a list of all the activitys on a persons alog or
+        an empty list for private people
+        usage:
+            me.alog()
+        '''
         if self.profile['alog'] is None:
             self._fetch_runemetrics()
         return self.profile['alog']
 
     def stats(self):
+        '''
+        returns a list of a persons levels
+        usage:
+            me.stats()
+        '''
         if self.profile['stats'] is None:
             self._fetch_runemetrics()
         return self.profile['stats']
 
     def quest_list(self):
+        '''
+        returns a list of all the quests and the lookuped players
+        progree in them
+        usage:
+            me.quest_list()
+        '''
         if self.profile['quest_list'] is None:
             self._fetch_quests()
         return self.profile['quest_list']
 
     def quest(self, name):
+        '''
+        searches throught the quest list then returns the quest
+        that matches that name
+        usage:
+            me.quest('rat catchers')
+        '''
         for q in self.quest_list():
             if q['title'].lower() == name.lower():
                 return q
 
     def clan(self):
+        '''
+        returns the clan name if they are in one
+        usage:
+            me.clan()
+        '''
         if self.profile['clan'] is None:
             self._fetch_clan_and_title()
         return self.profile['clan']
 
     def title(self):
+        '''
+        returns the title and weather its a suffix
+        usage:
+            me.title()
+        '''
         if self.profile['title'] is None:
             self._fetch_clan_and_title()
         return self.profile['title']
 
     def forum_pic(self):
+        '''
+        returns a url of the forum picture
+        usage:
+            me.forum_pic()
+        '''
         return self.FORUM_PIC_URL.format(self._rsn)
 
 
@@ -294,7 +367,7 @@ class Clan:
                 yield {'rsn': i[0], 'rank': i[1], 'clanxp': i[2], 'kills': i[3]}
 
 
-class Wikia:
+class _Wikia:
     '''
     a simple wrapper I made to navigate the wikia
     '''
@@ -315,8 +388,20 @@ class Wikia:
             yield wikia.page(self.wiki, i)
 
 
-osrsWikia = Wikia('2007runescape')
-rs3Wikia = Wikia('runescape')
+class osrsWikia(_Wikia):
+    '''
+    methods for exploring the osrs wikia
+    '''
+    def __init__(self):
+        self.wiki = '2007runescape'
+
+
+class Rs3Wikia(_Wikia):
+    '''
+    methords for exploring the rs3 wikia
+    '''
+    def __init__(self):
+        self.wiki = 'runescape'
 
 
 class Beasts:
@@ -325,7 +410,13 @@ class Beasts:
     '''
     @staticmethod
     def by_id(id: int):
-        '''returns stats and info about a beast by id'''
+        '''
+        returns stats and info about a beast by id
+        usage:
+            runescape.Beasts.by_id(47)
+        returns information about level 1 rats
+        to get the ids use runescape.Beasts.search(name)
+        '''
         BEAST_ID_URL = BASE_URL + 'm=itemdb_rs/bestiary/beastData.json?beastid={}'
         return requests.get(BEAST_ID_URL.format(id)).json()
 
@@ -333,6 +424,10 @@ class Beasts:
     def search(query: str):
         '''
         searches the beast database for a name and returns a list seperate with +
+        usage:
+            runescape.Beasts.search('rat+cat')
+        will give you a list of all the beasts that have rat or cat in their name
+        also that gives you the id
         '''
         BEAST_SEARCH_URL = BASE_URL + 'm=itemdb_rs/bestiary/beastSearch.json?term={}'
         return requests.get(BEAST_SEARCH_URL.format(query)).json()
@@ -340,14 +435,23 @@ class Beasts:
     @staticmethod
     def by_letter(letter: str):
         '''
-        returns a list of beasts starting with a letter
+        list of beasts starting with a letter
+        usage:
+            runescape.Beasts.by_letter('r')
+        will give a list of all the beasts starting with 'r'
         '''
         BEAST_LETTER_URL = BASE_URL + 'm=itemdb_rs/bestiary/bestiaryNames.json?letter={}'
         return requests.get(BEAST_LETTER_URL.format(letter.upper())).json()
 
     @staticmethod
     def area_names():
-        '''returns a list of area names'''
+        '''
+        returns a list of area names
+        usage:
+            runescape.Beasts.area_names()
+        it returns the same list every time so you should only need to call this
+        once in your code
+        '''
         AREA_URL = BASE_URL + 'm=itemdb_rs/bestiary/areaNames.json'
         return requests.get(AREA_URL).json()
 
@@ -356,6 +460,9 @@ class Beasts:
         '''
         returns a list of beasts in a specific area
         see runescape.Beasts.area_names() for the list
+        usage:
+            runescape.Beasts.by_area('Rat pits')
+        gives you a list of all the  beasts in the rat pits 
         '''
         BY_AREA_URL = BASE_URL + 'm=itemdb_rs/bestiary/areaBeasts.json?identifier={}'
         return requests.get(BY_AREA_URL.format(area.replace(' ', '+'))).json()
@@ -425,23 +532,6 @@ class GrandExchange:
     provides methods for fetching information about items in the grandexchange
     '''
     LETTER_URL = BASE_URL + 'm=itemdb_rs/api/catalogue/items.json?category={}&alpha={}&page={}'
-
-    @staticmethod
-    def item(id: int):
-        '''
-        gets information on a single item
-        '''
-        ITEM_URL = BASE_URL + 'm=itemdb_rs/api/catalogue/detail.json?item={}'
-        return requests.get(ITEM_URL.format(id)).json()
-
-    @staticmethod
-    def graph(id: int):
-        '''
-        gets info on the prices over time
-        '''
-        GRAPH_URL = BASE_URL + 'm=itemdb_rs/api/graph/{}.json'
-        return requests.get(GRAPH_URL.format(id)).json()
-
     CATEGORYS = {'miscellaneous': 0, 'ammo': 1, 'arrows': 2, 'bolts': 3,
                  'construction materials': 4, 'construction projects': 5,
                  'cooking ingredients': 6, 'costumes': 7, 'crafting materials': 8,
@@ -458,18 +548,53 @@ class GrandExchange:
                  'woodcutting product': 36, 'pocket items': 37}
 
     @staticmethod
+    def item(id: int):
+        '''
+        gets information on a single item usage
+        usage:
+            runescape.GrandExchange.item(1985)
+        that ^ will give you information about Cheese
+        '''
+        ITEM_URL = BASE_URL + 'm=itemdb_rs/api/catalogue/detail.json?item={}'
+        return requests.get(ITEM_URL.format(id)).json()
+
+    @staticmethod
+    def graph(id: int):
+        '''
+        gets info on the prices over time
+        usage:
+            runescape.GrandExchange.graph(1985)
+        that ^ will give you data plot points to create a graph
+        of cheese over time
+        '''
+        GRAPH_URL = BASE_URL + 'm=itemdb_rs/api/graph/{}.json'
+        return requests.get(GRAPH_URL.format(id)).json()
+
+    @staticmethod
     def cat_count(id: int):
         '''
         tells you how many items there are for each letter in a category
         give the id from 0 to 37 check runescape.GrandExchange.CATEGORYS for ids
+        usage:
+            runescape.cat_count(12)
+        will display the letter counts of the food and drink category
+        yes thats where you can find cheese!
         '''
         CAT_COUNT_URL = BASE_URL + 'm=itemdb_rs/api/catalogue/category.json?category={}'
         return requests.get(CAT_COUNT_URL.format(id)).json()['alpha']
 
     @staticmethod
-    def iter_letter(letter: str, category: int):
+    def iter_letter(letter: str, category: int, page_sleep: int=0):
         '''
-        iterates through a letter in a category
+        iterates through a letter (a-z or #(for number)) in a category
+        see runescape.GrandExchange.CATEGORYS for categorys
+        usage:
+            for item in runescape.GrandExchange.iter_leter('c', 12, 1):
+                #do stuff (find cheese maybe?)
+        that loop will go through all the items in the food and drink
+        category that start with the letter 'c' will also sleep for a second 
+        each grand exchange page to be nice to the runescape servers and to reduce
+        errors
         '''
         for l in GrandExchange.cat_count(category):
             if letter == l['letter']:
@@ -477,6 +602,7 @@ class GrandExchange:
                 break
         page_count = math.ceil(letter_count/12)
         for page in range(1, page_count + 1):
+            time.sleep(page_sleep)
             p = requests.get(GrandExchange.LETTER_URL.format(category, letter.replace('#', '%23'), page)).json()
             for item in p['items']:
                 yield item
@@ -486,11 +612,14 @@ class GrandExchange:
         '''
         iterates through an entire category in put an int from 0 to 37
         if you start getting errors use the second argument that is how many seconds
-        to sleep between pages
+        to sleep between pages default is 0 whitch will be fine for short bursts
         anouther way to use this is:
         ge = [c for i in range(0,38) for c in runescape.GrandExchange.iter_category(i, 5)]
         to get the full grand exchange in one list, will take some time tho
         so its best to only be getting one category at a time
+        regurlar usage:
+            for i in runescape.GrandExchange.iter_category(12, 1):
+                #do stuff
         '''
         cat_counts = GrandExchange.cat_count(category)
         for letter in cat_counts:
