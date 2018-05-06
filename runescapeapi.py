@@ -2,7 +2,7 @@
 A slightly memes wrapper for the runescape api, hopefully helps people
 best way to contact me with any problems is on discord raatty#3522
 read the rest of the docs for module usage step one is
-    import runescape
+    import runescapeapi as runescape
 the code in here might not be done in the best way but everything you
 need should be there
 '''
