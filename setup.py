@@ -7,9 +7,10 @@ name='runescapeapi',
 version='0',
 description='grandexchange, highscores, beasts, runemetrics',
 long_description=ld,
-long_description_content_type='text/plain',
 author='raatty',
-author_email='me@raatty.club',
 py_modules=["runesapeapi"],
 install_requires=['wikia'],
+python_requires='>=3',
+license='MIT',
+packages=find_packages()
 )
