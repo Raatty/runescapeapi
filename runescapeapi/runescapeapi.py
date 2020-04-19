@@ -38,7 +38,8 @@ class Highscores:
                    'Herblore': 8, 'Agility': 5, 'Thieving': 11,
                    'Slayer': 20, 'Farming': 21, 'Runecrafting': 19,
                    'Hunter': 23, 'Construction': 22, 'Summoning': 24,
-                   'Dungeoneering': 25, 'Divination': 26, 'Invention': 27}
+                   'Dungeoneering': 25, 'Divination': 26, 'Invention': 27,
+                   'Archaeology': 28}
 
     def _fetch(self, rsn, type, skill_count: int):
         url = self.HIGHSCORES_URL.format(type, rsn.replace(' ', '+'))
