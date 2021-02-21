@@ -4,7 +4,7 @@ with open('readme.txt') as f:
     ld = f.read()
 setup(
     name='runescapeapi',
-    version='1',
+    version='2',
     description='grandexchange, highscores, beasts, runemetrics',
     long_description=ld,
     long_description_content_type="text/plain",
