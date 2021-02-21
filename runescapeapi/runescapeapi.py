@@ -598,9 +598,9 @@ class GrandExchange:
     """
     provides methods for fetching information about items in the grandexchange
     """
-
+    MODE = "itemdb_rs"
     LETTER_URL = (
-        BASE_URL + "m=itemdb_rs/api/catalogue/items.json?category={}&alpha={}&page={}"
+        BASE_URL + "m={}/api/catalogue/items.json?category={}&alpha={}&page={}"
     )
     CATEGORYS = {
         "miscellaneous": 0,
@@ -643,19 +643,19 @@ class GrandExchange:
         "pocket items": 37,
     }
 
-    @staticmethod
-    def item(id: int):
+    @classmethod
+    def item(cls, id: int):
         """
         gets information on a single item usage
         usage:
             runescape.GrandExchange.item(1985)
         that ^ will give you information about Cheese
         """
-        ITEM_URL = BASE_URL + "m=itemdb_rs/api/catalogue/detail.json?item={}"
-        return requests.get(ITEM_URL.format(id)).json()
+        ITEM_URL = BASE_URL + "m={}/api/catalogue/detail.json?item={}"
+        return requests.get(ITEM_URL.format(cls.MODE, id)).json()
 
-    @staticmethod
-    def graph(id: int):
+    @classmethod
+    def graph(cls, id: int):
         """
         gets info on the prices over time
         usage:
@@ -663,24 +663,24 @@ class GrandExchange:
         that ^ will give you data plot points to create a graph
         of cheese over time
         """
-        GRAPH_URL = BASE_URL + "m=itemdb_rs/api/graph/{}.json"
-        return requests.get(GRAPH_URL.format(id)).json()
+        GRAPH_URL = BASE_URL + "m={}/api/graph/{}.json"
+        return requests.get(GRAPH_URL.format(cls.MODE, id)).json()
 
-    @staticmethod
-    def cat_count(id: int):
+    @classmethod
+    def cat_count(cls, id: int):
         """
         tells you how many items there are for each letter in a category
         give the id from 0 to 37 check runescape.GrandExchange.CATEGORYS for ids
         usage:
-            runescape.cat_count(12)
+            runescape.GrandExchange.cat_count(12)
         will display the letter counts of the food and drink category
         yes thats where you can find cheese!
         """
-        CAT_COUNT_URL = BASE_URL + "m=itemdb_rs/api/catalogue/category.json?category={}"
-        return requests.get(CAT_COUNT_URL.format(id)).json()["alpha"]
+        CAT_COUNT_URL = BASE_URL + "m={}/api/catalogue/category.json?category={}"
+        return requests.get(CAT_COUNT_URL.format(cls.MODE, id)).json()["alpha"]
 
-    @staticmethod
-    def iter_letter(letter: str, category: int, page_sleep: int = 0):
+    @classmethod
+    def iter_letter(cls, letter: str, category: int, page_sleep: int = 0):
         """
         iterates through a letter (a-z or #(for number)) in a category
         see runescape.GrandExchange.CATEGORYS for categorys
@@ -701,14 +701,14 @@ class GrandExchange:
             time.sleep(page_sleep)
             p = requests.get(
                 GrandExchange.LETTER_URL.format(
-                    category, letter.replace("#", "%23"), page
+                    cls.MODE, category, letter.replace("#", "%23"), page
                 )
             ).json()
             for item in p["items"]:
                 yield item
 
-    @staticmethod
-    def iter_category(category: int, page_sleep: int = 0):
+    @classmethod
+    def iter_category(cls, category: int, page_sleep: int = 0):
         """
         iterates through an entire category in put an int from 0 to 37
         if you start getting errors use the second argument that is how many seconds
@@ -728,8 +728,15 @@ class GrandExchange:
                 time.sleep(page_sleep)
                 p = requests.get(
                     GrandExchange.LETTER_URL.format(
-                        category, letter["letter"].replace("#", "%23"), page
+                        cls.MODE, category, letter["letter"].replace("#", "%23"), page
                     )
                 )
                 for item in p.json()["items"]:
                     yield item
+
+
+class OSRSGrandExchange(GrandExchange):
+    """
+    provides methods for fetching information about items in the old school grandexchange
+    """
+    MODE = "itemdb_oldschool"
