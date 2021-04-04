@@ -1,0 +1,5 @@
+.vscode
+build
+dist
+venv
+src/runescapeapi.egg-info
