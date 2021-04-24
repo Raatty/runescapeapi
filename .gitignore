@@ -2,4 +2,5 @@
 build
 dist
 venv
-src/runescapeapi.egg-info
+runescapeapi.egg-info
+*.pyc
