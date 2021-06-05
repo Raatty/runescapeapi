@@ -22,32 +22,34 @@ class MonthlyXpGain:
     total_gain: int
     month_data: List[MonthData]
 
+    @staticmethod
+    def url(user_name: str, skill: str) -> str:
+        return (
+            f"{RUNEMETRICS_BASE}xp-monthly?searchName={user_name}"
+            f"&skillid={SKILL_NAMES.index(skill)}"
+        )
 
-def get_monthly_xp_gain_url(user_name: str, skill: str) -> str:
-    return (
-        f"{RUNEMETRICS_BASE}xp-monthly?searchName={user_name}"
-        f"&skillid={SKILL_NAMES.index(skill)}"
-    )
+    @staticmethod
+    def from_responce(raw_response: str) -> "MonthlyXpGain":
+        j = json.loads(raw_response)["monthlyXpGain"][0]
+        return MonthlyXpGain(
+            skill_id=j["skillId"],
+            total_xp=j["totalXp"],
+            average_xp_gain=j["averageXpGain"],
+            total_gain=j["totalGain"],
+            month_data=[
+                MonthData(
+                    xp_gain=month["xpGain"],
+                    timestamp=datetime.fromtimestamp(
+                        month["timestamp"] // 1000
+                    ),
+                    rank=month["rank"],
+                )
+                for month in j["monthData"]
+            ],
+        )
 
-
-def monthly_xp_gain_from_responce(raw_response: str) -> MonthlyXpGain:
-    j = json.loads(raw_response)["monthlyXpGain"][0]
-    return MonthlyXpGain(
-        skill_id=j["skillId"],
-        total_xp=j["totalXp"],
-        average_xp_gain=j["averageXpGain"],
-        total_gain=j["totalGain"],
-        month_data=[
-            MonthData(
-                xp_gain=month["xpGain"],
-                timestamp=datetime.fromtimestamp(month["timestamp"] // 1000),
-                rank=month["rank"],
-            )
-            for month in j["monthData"]
-        ],
-    )
-
-
-def try_fetch_monthly_xp_gain(user_name: str, skill: str) -> MonthlyXpGain:
-    r = requests.get(get_monthly_xp_gain_url(user_name, skill)).text
-    return monthly_xp_gain_from_responce(r)
+    @classmethod
+    def try_fetch(cls, user_name: str, skill: str) -> "MonthlyXpGain":
+        r = requests.get(cls.url(user_name, skill)).text
+        return cls.from_responce(r)
