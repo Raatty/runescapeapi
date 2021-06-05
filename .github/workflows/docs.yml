@@ -15,7 +15,7 @@ jobs:
         uses: actions/setup-python@v2.2.2
       - name: Build pages
         run: |
-          pip install pdoc3
+          pip install pdoc3 requests
           pdoc --html runescapeapi
       - name: Publish pages
         working-directory: ./html/runescapeapi
