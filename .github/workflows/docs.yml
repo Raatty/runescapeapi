@@ -1,0 +1,30 @@
+name: Deploy docs
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+      - name: Setup Python
+        uses: actions/setup-python@v2.2.2
+      - name: Build pages
+        run: |
+          pip install pdoc3
+          pdoc --html runescapeapi
+      - name: Publish pages
+        working-directory: ./html/runescapeapi
+        run: |
+          git init .
+          git checkout -B gh-pages
+          git config user.name "actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -am "Deployed docs"
+          git remote add origin https://raatty:${{secrets.GITHUB_TOKEN}}@github.com/Raatty/runescapeapi
+          git push origin gh-pages --force
