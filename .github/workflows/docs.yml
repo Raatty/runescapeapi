@@ -25,6 +25,6 @@ jobs:
           git config user.name "actions"
           git config user.email "actions@github.com"
           git add .
-          git commit -am "Deployed docs"
-          git remote add origin https://raatty:${{secrets.GITHUB_TOKEN}}@github.com/Raatty/runescapeapi
+          git commit -am "Deployed docs for commit ${{github.sha}}"
+          git remote add origin https://${{github.repository_owner}}:${{secrets.GITHUB_TOKEN}}@github.com/${{github.repository}}
           git push origin gh-pages --force
