@@ -1,1 +1,1 @@
-BASE_URL: str = "http://services.runescape.com/"
+BASE_URL: str = "https://services.runescape.com/"
