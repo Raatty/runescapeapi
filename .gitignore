@@ -1,0 +1,7 @@
+.vscode
+build
+dist
+venv
+runescapeapi.egg-info
+*.pyc
+html

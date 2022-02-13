@@ -1,1 +1,1 @@
-from .runescapeapi import *
+BASE_URL: str = "https://services.runescape.com/"
